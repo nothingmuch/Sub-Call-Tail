@@ -27,7 +27,7 @@ __END__
 
 =head1 NAME
 
-Sub::Call::Tail - Tail calls without goto
+Sub::Call::Tail - Tail calls for subroutines and methods
 
 =head1 SYNOPSIS
 
