@@ -221,6 +221,9 @@ convert_to_tailcall (pTHX_ OP *o, CV *cv, void *user_data) {
     if ( entersub->op_ppaddr == error_op )
         croak("The tail call modifier cannot be applied to itself");
 
+    if ( entersub->op_ppaddr != PL_ppaddr[OP_ENTERSUB] )
+        croak("The tail call modifier can only be applied to normal subroutine calls");
+
     if ( !(entersub->op_flags & OPf_STACKED) ) {
 	((LISTOP *)cUNOPo->op_first)->op_first->op_sibling = entersub->op_sibling;
 	entersub->op_sibling = NULL;
