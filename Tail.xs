@@ -9,6 +9,9 @@
 
 #include "hook_op_check_entersubforcv.h"
 
+STATIC OP * error_op (pTHX) {
+    croak("panic: tail call modifier called as subroutine");
+}
 
 
 STATIC OP *
@@ -207,8 +210,19 @@ convert_to_tailcall (pTHX_ OP *o, CV *cv, void *user_data) {
         croak("Tail call must have arguments");
     }
 
-    /* change the ppaddr of the inner entersub to become a goto */
+    if ( entersub->op_type != OP_ENTERSUB )
+        croak("The tail call modifier must be applied to a subroutine or method invocation");
+
+    if ( entersub->op_sibling != NULL && entersub->op_sibling->op_sibling != NULL )
+        croak("The tail call modifier must not be given additional arguments");
+
+    if ( entersub->op_ppaddr == error_op )
+        croak("The tail call modifier cannot be applied to itself");
+
+    /* change the ppaddr of the inner entersub to become a custom goto op that
+     * takes its args like entersub does */
     entersub->op_ppaddr = goto_entersub;
+    o->op_ppaddr = error_op;
 
     /* the rest is unmodified, this code will not actually be run (except for
      * the pushmark), but allows deparsing etc to work correctly */
