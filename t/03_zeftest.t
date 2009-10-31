@@ -103,8 +103,7 @@ sub t7b {
 	return "x";
 }
 sub t7c {
-	#tail &t0r; # FIXME this is not [yet] supported because entersub/goto do not agree about the meaning of OPf_STACKED
-	goto &t0r;
+	tail &t0r;
 	return "x";
 }
 is_deeply t7a("a"), [ "r0", "x", "a", "y", "r1" ];

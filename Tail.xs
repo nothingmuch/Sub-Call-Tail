@@ -212,10 +212,6 @@ convert_to_tailcall (pTHX_ OP *o, CV *cv, void *user_data) {
     /* find the nested entersub */
     UNOP *entersub = (UNOP *)((LISTOP *)cUNOPo->op_first)->op_first->op_sibling;
 
-    if ( !(entersub->op_flags & OPf_STACKED) ) {
-        croak("Tail call must have arguments");
-    }
-
     if ( entersub->op_type != OP_ENTERSUB )
         croak("The tail call modifier must be applied to a subroutine or method invocation");
 
@@ -224,6 +220,14 @@ convert_to_tailcall (pTHX_ OP *o, CV *cv, void *user_data) {
 
     if ( entersub->op_ppaddr == error_op )
         croak("The tail call modifier cannot be applied to itself");
+
+    if ( !(entersub->op_flags & OPf_STACKED) ) {
+	((LISTOP *)cUNOPo->op_first)->op_first->op_sibling = entersub->op_sibling;
+	entersub->op_sibling = NULL;
+	op_free(o);
+	entersub->op_private &= ~(OPpENTERSUB_INARGS|OPpENTERSUB_NOPAREN);
+	return newLOOPEX(OP_GOTO, (OP*)entersub);
+    }
 
     /* change the ppaddr of the inner entersub to become a custom goto op that
      * takes its args like entersub does */
