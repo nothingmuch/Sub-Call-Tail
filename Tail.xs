@@ -7,6 +7,10 @@
 #define NEED_sv_2pv_flags
 #include "ppport.h"
 
+#ifndef AvREIFY_only
+#define AvREIFY_only(av)	AvREAL_off(av)
+#endif
+
 #include "hook_op_check_entersubforcv.h"
 
 STATIC OP * error_op (pTHX) {
@@ -87,7 +91,7 @@ got_rv:
                 SV * const * sp = &sv;          /* Used in tryAMAGICunDEREF macro. */
                 tryAMAGICunDEREF(to_cv);
             }
-            cv = MUTABLE_CV(SvRV(sv));
+            cv = (CV *)SvRV(sv);
             if (SvTYPE(cv) == SVt_PVCV)
                 break;
             /* FALL THROUGH */
@@ -96,7 +100,7 @@ got_rv:
             DIE(aTHX_ "Not a CODE reference");
             /* This is the second most common case:  */
         case SVt_PVCV:
-            cv = MUTABLE_CV(sv);
+            cv = (CV *)sv;
             break;
     }
 
