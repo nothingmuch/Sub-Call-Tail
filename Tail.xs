@@ -189,7 +189,7 @@ try_autoload:
     SP -= items;
 
     /* finally, execute goto. goto uses a ref to the cv, and takes the args out
-     * of defgv */
+     * of the context stack frame */
 
     PUSHMARK(SP);
     XPUSHs(sv_2mortal(newRV_inc((SV *)cv)));
