@@ -13,20 +13,22 @@ BEGIN {
     constant->import( HAS_PROCESS_INFO => not not eval { require Proc::ProcessTable; 1 } );
 }
 
-sub even ($);
-
-sub odd ($) {
+sub odd {
     my $n = shift;
+
+    @_ = ( 1 .. 749 );
 
     return 0 if $n == 0;
 
-    tail even($n - 1);
+    tail even($n - 1, "foo" x 1000, 1 .. 100);
 }
 
-sub even ($) {
+sub even {
     return 1 if $_[0] == 0;
 
-    tail odd($_[0] - 1);
+    my @foo = ( 1 .. 100 );
+
+    tail odd($_[0] - 1, sub { scalar(@foo) . "foo" });
 }
 
 sub get_real_mem {
@@ -59,7 +61,9 @@ sub large_number {
     }
 }
 
-foreach my $num ( 3, 1000, 10000, 100001, 1000001 ) {
+my $leak_max = $ENV{TAILCALL_LEAK_TEST} || 10000;
+
+foreach my $num ( grep { $_ <= $leak_max } 3, 1000, 10000, 100001, 1000001, 47185437, 1734873865 ) {
     large_number($num);
 }
 
