@@ -59,6 +59,8 @@ L<http://github.com/nothingmuch/Sub-Call-Tail>
 
 Yuval Kogman
 
+Andrew Main (Zefram)
+
 =head1 COPYRIGHT & LICENSE
 
 	Copyright (c) 2009 Yuval Kogman. All rights reserved
