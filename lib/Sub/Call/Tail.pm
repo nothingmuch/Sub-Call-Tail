@@ -51,6 +51,8 @@ at compile time into a goto.
 
 L<B::Hooks::OP::Check::EntersubForCV>
 
+L<CPS>
+
 =head1 VERSION CONTROL
 
 L<http://github.com/nothingmuch/Sub-Call-Tail>
