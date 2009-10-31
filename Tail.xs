@@ -135,7 +135,7 @@ try_autoload:
      * entersub. We set it up so that defgv is pointing at the pushed args as
      * set up by the entersub call, this will let pp_goto work unmodified */
 
-    av = GvAV(PL_defgv);
+    av = cx->blk_sub.argarray;
 
     /* abandon @_ if it got reified */
     if (AvREAL(av)) {
@@ -143,7 +143,6 @@ try_autoload:
         av = newAV();
         AvREIFY_only(av);
 
-        GvAV(PL_defgv) = av;
         cx->blk_sub.argarray = av;
         PAD_SVl(0) = (SV *)av;
     }
@@ -162,7 +161,7 @@ try_autoload:
 
             /* if we find a PADMY it's probably from the scope being destroyed,
              * so we should reify @_ to increase the refcnt */
-            if SvPADMY(*MARK) reify++;
+            reify = reify || ( SvPADMY(*MARK) && !SvFAKE(*MARK) );
         }
         MARK++;
     }

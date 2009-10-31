@@ -42,6 +42,19 @@ sub blah {
     tail args("foo");
 }
 
+sub blooh {
+    @_ = qw(blah blah);
+    my $x = 42;
+    tail args($x);
+}
+
+sub AUTOLOAD { our $AUTOLOAD }
+
+sub auto {
+    no strict 'subs';
+    tail something_autoloaded();
+}
+
 sub tests {
     my $foo = bless {};
     my $copy = \$foo;
@@ -57,6 +70,9 @@ sub tests {
     is( $foo->oo_args_temp(qw(foo bar)), "$foo hello foo bar", "oo args for tail call without var" );
 
     is( blah(), "foo", 'reified @_ gets dropped' );
+    is( blooh(), 42, 'reified @_ recreated' );
+
+    is( auto(), "main::something_autoloaded", "autoload" );
 }
 
 tests();
