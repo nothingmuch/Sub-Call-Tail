@@ -55,6 +55,15 @@ sub auto {
     tail something_autoloaded();
 }
 
+sub anon_immortal {
+    tail((sub { 3 })->());
+}
+
+sub anon {
+    my $x = 3;
+    tail((sub { $x })->());
+}
+
 sub tests {
     my $foo = bless {};
     my $copy = \$foo;
@@ -73,6 +82,9 @@ sub tests {
     is( blooh(), 42, 'reified @_ recreated' );
 
     is( auto(), "main::something_autoloaded", "autoload" );
+
+    is( anon_immortal(), 3, "anon sub (not cloned)" );
+    is( anon(), 3, "anon sub" );
 }
 
 tests();
