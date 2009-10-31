@@ -160,11 +160,13 @@ try_autoload:
 
     while (MARK <= SP) {
         if (*MARK) {
-            SvTEMP_off(*MARK);
+            /* if we find a lexical (PADMY) or a TEMP it's probably from
+             * the scope being destroyed, so we should reify @_ to increase
+             * the refcnt (this is suboptimal for tail foo($_[0]) or
+             * something but that's just a minor refcounting cost */
+            reify = reify || ( SvTEMP(*MARK) || SvPADMY(*MARK) && !SvFAKE(*MARK) );
 
-            /* if we find a PADMY it's probably from the scope being destroyed,
-             * so we should reify @_ to increase the refcnt */
-            reify = reify || ( SvPADMY(*MARK) && !SvFAKE(*MARK) );
+            SvTEMP_off(*MARK);
         }
         MARK++;
     }
