@@ -17,14 +17,29 @@ goto_entersub (pTHX) {
     GV *gv;
     CV *cv;
     AV *av;
-    I32 items = SP - MARK;
+    IV items = SP - MARK;
     int reify = 0;
+    IV cxix = cxstack_ix;
+    PERL_CONTEXT *cx = NULL;
+
+    while ( cxix > 0 ) {
+        if ( CxTYPE(&cxstack[cxix]) == CXt_SUB ) {
+            cx = &cxstack[cxix];
+            break;
+        } else {
+            cxix--;
+        }
+    }
+    
+    if (cx == NULL)
+        DIE(aTHX_ "Can't goto subroutine outside a subroutine");
 
     /* this first steaming hunk of cargo cult is copypasted from entersub...
      * it's pretty the original but the ENTER/LEAVE or the actual execution */
 
     if (!sv)
         DIE(aTHX_ "Not a CODE reference");    
+
     switch (SvTYPE(sv)) {
         /* This is overwhelming the most common case:  */
         case SVt_PVGV:
@@ -66,9 +81,9 @@ goto_entersub (pTHX) {
             }
 got_rv:
             {
-                SV * const * sp = &sv;		/* Used in tryAMAGICunDEREF macro. */
+                SV * const * sp = &sv;          /* Used in tryAMAGICunDEREF macro. */
                 tryAMAGICunDEREF(to_cv);
-            }	
+            }
             cv = MUTABLE_CV(SvRV(sv));
             if (SvTYPE(cv) == SVt_PVCV)
                 break;
@@ -126,27 +141,17 @@ try_autoload:
     if (AvREAL(av)) {
         SvREFCNT_dec(av);
         av = newAV();
-        av_extend(av, items-1);
         AvREIFY_only(av);
-        PAD_SVl(0) = MUTABLE_SV( GvAV(PL_defgv) = av );
+
+        GvAV(PL_defgv) = av;
+        cx->blk_sub.argarray = av;
+        PAD_SVl(0) = (SV *)av;
     }
 
     /* copy items from the stack to defgv */
     ++MARK;
 
-    if (items > AvMAX(av) + 1) {
-        SV **ary = AvALLOC(av);
-        if (AvARRAY(av) != ary) {
-            AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-            AvARRAY(av) = ary;
-        }
-        if (items > AvMAX(av) + 1) {
-            AvMAX(av) = items - 1;
-            Renew(ary,items,SV*);
-            AvALLOC(av) = ary;
-            AvARRAY(av) = ary;
-        }
-    }
+    av_extend(av, items-1);
 
     Copy(MARK,AvARRAY(av),items,SV*);
     AvFILLp(av) = items - 1;
@@ -211,7 +216,7 @@ convert_to_tailcall (pTHX_ OP *o, CV *cv, void *user_data) {
     return o;
 }
 
-MODULE = Sub::Call::Tail	PACKAGE = Sub::Call::Tail
+MODULE = Sub::Call::Tail        PACKAGE = Sub::Call::Tail
 PROTOTYPES: disable
 
 BOOT:
