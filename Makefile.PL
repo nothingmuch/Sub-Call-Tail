@@ -13,7 +13,13 @@ requires_external_cc;
 
 requires 'parent';
 configure_requires 'ExtUtils::Depends' => 0.302; #minimum version that works on Win32+gcc
-build_requires 'B::Hooks::OP::Check::EntersubForCV';
+
+foreach my $mod qw(B::Hooks::OP::Check::EntersubForCV) {
+	configure_requires $mod;
+	build_requires $mod;
+	requires $mod;
+}
+
 test_requires 'Test::More' => 0.88;
 test_requires 'Test::use::ok';
 
