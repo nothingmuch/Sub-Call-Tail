@@ -64,6 +64,11 @@ sub anon {
     tail((sub { $x })->());
 }
 
+sub tmps {
+    my $y = "";
+    tail args(map { $_ . $y } @_);
+}
+
 sub tests {
     my $foo = bless {};
     my $copy = \$foo;
@@ -85,6 +90,8 @@ sub tests {
 
     is( anon_immortal(), 3, "anon sub (not cloned)" );
     is( anon(), 3, "anon sub" );
+
+    is( tmps(qw(foo bar)), "foo bar", "tmps" );
 }
 
 tests();
