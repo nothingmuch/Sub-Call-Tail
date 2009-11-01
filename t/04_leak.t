@@ -7,10 +7,18 @@ use Test::More;
 
 use Sub::Call::Tail;
 
+sub get_real_mem {
+    if ( my ( $self ) = grep { $_->pid == $$ } @{Proc::ProcessTable->new->table} ) {
+        return $self->size;
+    } else {
+        return 0;
+    }
+}
+
 BEGIN {
     require constant;
     local $@;
-    constant->import( HAS_PROCESS_INFO => not not eval { require Proc::ProcessTable; 1 } );
+    constant->import( HAS_PROCESS_INFO => not not eval { require Proc::ProcessTable; get_real_mem() != 0 } );
 }
 
 sub odd {
@@ -29,14 +37,6 @@ sub even {
     my @foo = ( 1 .. 100 );
 
     tail odd($_[0] - 1, sub { scalar(@foo) . "foo" });
-}
-
-sub get_real_mem {
-    if ( my ( $self ) = grep { $_->pid == $$ } @{Proc::ProcessTable->new->table} ) {
-        return $self->size;
-    } else {
-        return 0;
-    }
 }
 
 is( even(1), 0, "1 is odd" );
