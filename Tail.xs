@@ -225,11 +225,11 @@ convert_to_tailcall (pTHX_ OP *o, CV *cv, void *user_data) {
         croak("The tail call modifier can only be applied to normal subroutine calls");
 
     if ( !(entersub->op_flags & OPf_STACKED) ) {
-	((LISTOP *)cUNOPo->op_first)->op_first->op_sibling = entersub->op_sibling;
-	entersub->op_sibling = NULL;
-	op_free(o);
-	entersub->op_private &= ~(OPpENTERSUB_INARGS|OPpENTERSUB_NOPAREN);
-	return newLOOPEX(OP_GOTO, (OP*)entersub);
+        ((LISTOP *)cUNOPo->op_first)->op_first->op_sibling = entersub->op_sibling;
+        entersub->op_sibling = NULL;
+        op_free(o);
+        entersub->op_private &= ~(OPpENTERSUB_INARGS|OPpENTERSUB_NOPAREN);
+        return newLOOPEX(OP_GOTO, (OP*)entersub);
     }
 
     /* change the ppaddr of the inner entersub to become a custom goto op that
