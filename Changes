@@ -1,3 +1,6 @@
+0.03
+	- Makefile.PL voodoo
+
 0.02
 	- stricter checking of modified entersub ops (Zefram)
 	- better skipping logic and other tweaks for the leak test
