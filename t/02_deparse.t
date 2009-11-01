@@ -16,21 +16,22 @@ sub invoke {
     $sub->();
 }
 
+my $foo = bless {};
 
-my $sub = sub { tail bar() };
+foreach my $sub ( sub { tail bar() }, sub { tail $foo->bar() }, sub { tail &bar }, sub { goto &bar } ) {
+    is( invoke(\&bar), "main::invoke", "normal call" );
+    is( invoke($sub), "main::invoke", "tail call" );
 
-is( invoke(\&bar), "main::invoke", "normal call" );
-is( invoke($sub), "main::invoke", "tail call" );
+    my $source = B::Deparse->new->coderef2text($sub);
 
-my $source = B::Deparse->new->coderef2text($sub);
+    like( $source, qr/tail|goto/, "source mentions tail or goto" );
 
-like( $source, qr/tail/, "source mentions tail" );
+    my $new = eval "sub $source";
 
-my $new = eval "sub $source";
+    is( ref($new), 'CODE', "compiled a coderef" );
 
-is( ref($new), 'CODE', "compiled a coderef" );
-
-is( invoke($new), "main::invoke", "compiled coderef has valid tail call" );
+    is( invoke($new), "main::invoke", "compiled coderef has valid tail call" );
+}
 
 done_testing;
 
