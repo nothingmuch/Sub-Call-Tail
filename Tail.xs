@@ -83,7 +83,7 @@ goto_entersub (pTHX) {
                     DIE(aTHX_ PL_no_usym, "a subroutine");
                 if (PL_op->op_private & HINT_STRICT_REFS)
                     DIE(aTHX_ PL_no_symref, sym, "a subroutine");
-                cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
+                cv = get_cv(sym, GV_ADD|SvUTF8(sv));
                 break;
             }
 got_rv:
