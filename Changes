@@ -1,0 +1,9 @@
+0.02
+	- stricter checking of modified entersub ops (Zefram)
+	- better skipping logic and other tweaks for the leak test
+	- use get_cv instead of get_cvn_flags as it is not yet in ppport.h
+	- improved reification logic (gfx & nothingmuch)
+	- more thorough testing
+
+0.01
+	- Initial release
