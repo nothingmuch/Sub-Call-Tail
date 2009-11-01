@@ -25,7 +25,6 @@ goto_entersub (pTHX) {
     CV *cv;
     AV *av;
     IV items = SP - MARK;
-    int reify = 0;
     IV cxix = cxstack_ix;
     PERL_CONTEXT *cx = NULL;
 
@@ -168,31 +167,29 @@ try_autoload:
              * the scope being destroyed, so we should reify @_ to increase
              * the refcnt (this is suboptimal for tail foo($_[0]) or
              * something but that's just a minor refcounting cost */
-            reify = reify || ( SvTEMP(*MARK) || SvPADMY(*MARK) && !SvFAKE(*MARK) );
 
-            SvTEMP_off(*MARK);
+            if ( SvTEMP(*MARK) || SvPADMY(*MARK) ) {
+                I32 key;
+
+                key = AvMAX(av) + 1;
+                while (key > AvFILLp(av) + 1)
+                    AvARRAY(av)[--key] = &PL_sv_undef;
+                while (key) {
+                    SV * const sv = AvARRAY(av)[--key];
+                    assert(sv);
+                    if (sv != &PL_sv_undef)
+                        SvREFCNT_inc_simple_void_NN(sv);
+                }
+                key = AvARRAY(av) - AvALLOC(av);
+                while (key)
+                    AvALLOC(av)[--key] = &PL_sv_undef;
+                AvREIFY_off(av);
+                AvREAL_on(av);
+
+                break;
+            }
         }
         MARK++;
-    }
-
-
-    if ( reify ) {
-        I32 key;
-
-        key = AvMAX(av) + 1;
-        while (key > AvFILLp(av) + 1)
-            AvARRAY(av)[--key] = &PL_sv_undef;
-        while (key) {
-            SV * const sv = AvARRAY(av)[--key];
-            assert(sv);
-            if (sv != &PL_sv_undef)
-                SvREFCNT_inc_simple_void_NN(sv);
-        }
-        key = AvARRAY(av) - AvALLOC(av);
-        while (key)
-            AvALLOC(av)[--key] = &PL_sv_undef;
-        AvREIFY_off(av);
-        AvREAL_on(av);
     }
 
     SP -= items;
