@@ -1,3 +1,6 @@
+0.04
+	- Correct fallback definition of AvREIFY_only (Andrew Rodland)
+
 0.03
 	- Makefile.PL voodoo
 
