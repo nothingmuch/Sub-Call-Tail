@@ -12,7 +12,7 @@ all_from 'lib/Sub/Call/Tail.pm';
 requires_external_cc;
 
 requires 'parent';
-build_requires 'Sub::Exporter';
+requires 'Sub::Exporter';
 configure_requires 'ExtUtils::Depends' => 0.302; #minimum version that works on Win32+gcc
 
 foreach my $mod qw(B::Hooks::OP::Check::EntersubForCV) {
