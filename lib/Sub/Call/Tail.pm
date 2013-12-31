@@ -4,14 +4,12 @@ use strict;
 use warnings;
 
 require 5.008001;
-use parent qw(Exporter DynaLoader);
+use parent qw(DynaLoader);
 use B::Hooks::OP::Check::EntersubForCV;
+use Sub::Exporter -setup => { exports => [qw( tail )] };
 
 our $VERSION = '0.04';
 $VERSION = eval $VERSION;
-
-our @EXPORT = our @EXPORT_OK = qw(tail);
-our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
 __PACKAGE__->bootstrap($VERSION);
 
@@ -38,6 +36,11 @@ Sub::Call::Tail - Tail calls for subroutines and methods
 
     # instead of @_ = @blah; goto &foo
     tail foo(@blah);
+
+    # We use Sub::Exporter, so you can use a different keyword if it clashes
+    use Sub::Call::Tail 'tail' => { -as => 'tail_call' };
+
+    tail_call foo(@blah);
 
 =head1 DESCRIPTION
 

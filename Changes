@@ -1,3 +1,6 @@
+NEXT
+    - allow renaming of import with Sub::Exporter (osfameron)
+
 0.04
 	- Correct fallback definition of AvREIFY_only (Andrew Rodland)
 
