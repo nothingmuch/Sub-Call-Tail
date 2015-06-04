@@ -153,6 +153,13 @@ try_autoload:
         PAD_SVl(0) = (SV *)av;
     }
 
+    if (GvAV(PL_defgv) != av) {
+        AV *olddefav = GvAV(PL_defgv);
+        SvREFCNT_inc((SV*)av);
+        GvAV(PL_defgv) = av;
+        SvREFCNT_dec((SV*)olddefav);
+    }
+
     /* copy items from the stack to defgv */
     ++MARK;
 
